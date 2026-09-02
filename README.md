@@ -56,7 +56,7 @@ npm run smoke
 ## Using it
 
 1. Establish a station (a name and a point on Earth), or walk the sample hollow.
-2. If you walked the sample, a banner at the top of the book lets you start your own station — that clears the invented records and returns you to setup.
+2. The sample stays until you start your own station. Click **Witness Tree** or **Home** to return to the first screen without erasing it. A small **Sample** mark shows when you are in the canned hollow.
 3. Press **Log a first** or the `n` key.
 4. Click a mark on the ring to pin it. Click an empty stretch of the ring to pre-date a record.
 

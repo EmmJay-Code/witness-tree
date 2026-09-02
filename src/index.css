@@ -335,45 +335,16 @@ textarea {
   min-width: 0;
 }
 
-.sample-banner {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem 1.2rem;
-  padding: 0.7rem 1.3rem;
-  background: color-mix(in srgb, var(--moss) 12%, var(--paper-lift));
-  border-bottom: 1px solid var(--rule);
+.home-confirm {
+  margin-top: 1.1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--paper-lift);
 }
 
-.sample-banner p {
-  margin: 0;
-  max-width: 42rem;
-}
-
-.sample-banner-tag {
-  font-family: 'IBM Plex Mono', ui-monospace, monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  margin-right: 0.65rem;
-  padding: 0.15rem 0.45rem;
-  border: 1px solid var(--moss);
-  border-radius: 999px;
-  color: var(--moss);
-}
-
-.sample-banner-confirm {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem 0.7rem;
-}
-
-.sample-banner-confirm p {
-  width: 100%;
-  color: var(--ink-soft);
-  font-size: 0.95rem;
+.home-confirm p {
+  margin-bottom: 0.35rem;
 }
 
 .spine {
@@ -386,11 +357,27 @@ textarea {
   gap: 1.4rem;
 }
 
+.spine-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.55rem;
+}
+
 .spine-brand {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 0.8rem;
+  background: none;
+  border: 0;
+  color: inherit;
+  padding: 0.2rem;
+  cursor: pointer;
+}
+
+.spine-brand:hover .spine-title {
+  opacity: 1;
 }
 
 .spine-mark {
@@ -408,6 +395,36 @@ textarea {
   letter-spacing: 0.18em;
   text-transform: uppercase;
   font-size: 0.78rem;
+}
+
+.sample-chip {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 0.12rem 0.4rem;
+  border: 1px solid color-mix(in srgb, var(--spine-ink) 55%, transparent);
+  border-radius: 999px;
+  color: var(--spine-ink);
+  opacity: 0.85;
+}
+
+.spine-home {
+  background: none;
+  border: 0;
+  color: inherit;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem;
+  opacity: 0.72;
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
+.spine-home:hover {
+  opacity: 1;
 }
 
 .spine-nav {
@@ -823,6 +840,13 @@ textarea {
     gap: 0.5rem;
   }
 
+  .spine-top {
+    flex-direction: row;
+    align-items: center;
+    gap: 0.45rem;
+    flex-shrink: 0;
+  }
+
   .spine-brand {
     flex-direction: row;
     gap: 0.4rem;
@@ -873,10 +897,6 @@ textarea {
     border-top: 1px solid var(--rule);
   }
 
-  .sample-banner {
-    padding: 0.7rem 1rem;
-  }
-
   .almanac-grid,
   .form-grid,
   .coord-row {
@@ -905,7 +925,6 @@ textarea {
   .spine,
   .panel .keys,
   .ring-toolbar .btn,
-  .sample-banner,
   .btn {
     display: none !important;
   }

@@ -16,6 +16,7 @@ export function StationView() {
     restore,
     loadSample,
     resetAll,
+    goHome,
   } = useStore()
   const fileRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState('')
@@ -194,23 +195,12 @@ export function StationView() {
         {sample ? (
           <>
             <p>
-              This station is the canned walk-through. Starting your own book clears these invented
-              records. Your real ledger is never behind this button — only the sample is.
+              This is the canned walk-through. It stays until you establish your own station from
+              Home. Click Witness Tree at the top to go back without erasing it.
             </p>
-            {!confirmSample ? (
-              <button type="button" className="btn" onClick={() => setConfirmSample(true)}>
-                Start your own station
-              </button>
-            ) : (
-              <div className="choice-row">
-                <button type="button" className="btn" onClick={() => void resetAll()}>
-                  Yes, clear the sample
-                </button>
-                <button type="button" className="btn btn-quiet" onClick={() => setConfirmSample(false)}>
-                  Stay here
-                </button>
-              </div>
-            )}
+            <button type="button" className="btn" onClick={goHome}>
+              Home
+            </button>
           </>
         ) : (
           <>

@@ -9,7 +9,7 @@ import {
 } from 'react'
 import type { Observation, Settings, Species, Station, View } from '../types'
 import { allSpecies, makeId } from '../lib/ids'
-import { buildSampleObservations, SAMPLE_STATION } from '../lib/sample'
+import { buildSampleObservations, isSampleStation, SAMPLE_STATION } from '../lib/sample'
 import * as db from '../lib/storage'
 
 interface Store {
@@ -38,6 +38,11 @@ interface Store {
   loadSample: () => Promise<void>
   restore: (station: Station | null, observations: Observation[], custom: Species[], settings: Settings) => Promise<void>
   resetAll: () => Promise<void>
+  home: boolean
+  goHome: () => void
+  openBook: () => void
+  openSample: () => Promise<void>
+  beginOwnStation: (station: Station) => Promise<void>
 }
 
 const StoreContext = createContext<Store | null>(null)
@@ -53,6 +58,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [formOpen, setFormOpen] = useState(false)
   const [formDate, setFormDate] = useState<string | null>(null)
   const [query, setQuery] = useState('')
+  const [home, setHome] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -89,6 +95,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const saveStation = useCallback(async (next: Station) => {
     await db.saveStation(next)
     setStation(next)
+    setHome(false)
   }, [])
 
   const saveObservation = useCallback(
@@ -175,6 +182,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       theme: settings.theme,
       selectedYear: 'all',
     })
+    setHome(false)
     setView('ring')
   }, [restore, settings.theme])
 
@@ -186,8 +194,44 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setSettings({ theme: settings.theme, selectedYear: 'all' })
     setSelectedId(null)
     setFormOpen(false)
+    setFormDate(null)
+    setHome(true)
     setView('ring')
   }, [settings.theme])
+
+  const goHome = useCallback(() => {
+    setHome(true)
+    setFormOpen(false)
+    setFormDate(null)
+    setSelectedId(null)
+  }, [])
+
+  const openBook = useCallback(() => {
+    setHome(false)
+    setView('ring')
+  }, [])
+
+  const openSample = useCallback(async () => {
+    if (isSampleStation(station)) {
+      setHome(false)
+      setView('ring')
+      return
+    }
+    await loadSample()
+  }, [loadSample, station])
+
+  const beginOwnStation = useCallback(
+    async (next: Station) => {
+      const own: Station = { ...next, sample: false }
+      await restore(own, [], [], {
+        theme: settings.theme,
+        selectedYear: 'all',
+      })
+      setHome(false)
+      setView('ring')
+    },
+    [restore, settings.theme],
+  )
 
   const openForm = useCallback((date?: string, existingId?: string) => {
     setSelectedId(existingId ?? null)
@@ -227,6 +271,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loadSample,
       restore,
       resetAll,
+      home,
+      goHome,
+      openBook,
+      openSample,
+      beginOwnStation,
     }),
     [
       ready,
@@ -251,6 +300,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       loadSample,
       restore,
       resetAll,
+      home,
+      goHome,
+      openBook,
+      openSample,
+      beginOwnStation,
     ],
   )
 

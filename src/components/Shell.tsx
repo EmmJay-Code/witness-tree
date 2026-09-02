@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { VIEWS } from '../types'
 import { yearsInRange } from '../lib/calendar'
+import { isSampleStation } from '../lib/sample'
 import { useStore } from '../state/store'
 import { YearRing } from './YearRing'
 import { Almanac } from './Almanac'
@@ -8,7 +9,6 @@ import { Log } from './Log'
 import { Library } from './Library'
 import { StationView } from './Station'
 import { ObservationForm } from './ObservationForm'
-import { SampleBanner } from './SampleBanner'
 import { Specimen } from './Specimen'
 
 export function Shell() {
@@ -26,6 +26,7 @@ export function Shell() {
     closeForm,
     settings,
     updateSettings,
+    goHome,
   } = useStore()
 
   const years = yearsInRange(observations, new Date().getFullYear())
@@ -63,12 +64,24 @@ export function Shell() {
 
   if (!station) return null
 
+  const sample = isSampleStation(station)
+
   return (
     <div className="shell">
       <aside className="spine">
-        <div className="spine-brand">
-          <span className="spine-mark" aria-hidden="true" />
-          <span className="spine-title">Witness Tree</span>
+        <div className="spine-top">
+          <button type="button" className="spine-brand" onClick={goHome} aria-label="Witness Tree home">
+            <span className="spine-mark" aria-hidden="true" />
+            <span className="spine-title">Witness Tree</span>
+          </button>
+          {sample && (
+            <span className="sample-chip" title="This is the sample hollow">
+              Sample
+            </span>
+          )}
+          <button type="button" className="spine-home" onClick={goHome}>
+            Home
+          </button>
         </div>
         <nav className="spine-nav" aria-label="Primary">
           {VIEWS.map((item) => (
@@ -88,7 +101,6 @@ export function Shell() {
       </aside>
 
       <div className="shell-body">
-        <SampleBanner />
         <div className="shell-pages">
           <main className="stage">
         {view === 'ring' && (

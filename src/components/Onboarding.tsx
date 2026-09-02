@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { hemisphereFromLat, PLACES, formatCoords } from '../data/places'
 import { isoDate } from '../lib/calendar'
+import { isSampleStation } from '../lib/sample'
 import { useStore } from '../state/store'
 import type { Station } from '../types'
 
 export function Onboarding() {
-  const { saveStation, loadSample } = useStore()
+  const { station, saveStation, loadSample, openSample, openBook, beginOwnStation } = useStore()
   const [step, setStep] = useState(0)
   const [name, setName] = useState('')
   const [observer, setObserver] = useState('')
@@ -13,11 +14,15 @@ export function Onboarding() {
   const [lon, setLon] = useState('')
   const [placeName, setPlaceName] = useState<string | null>(null)
   const [geoError, setGeoError] = useState('')
+  const [confirmNew, setConfirmNew] = useState(false)
+  const [confirmSample, setConfirmSample] = useState(false)
 
   const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
   const parsedLat = Number(lat)
   const parsedLon = Number(lon)
   const coordsOk = Number.isFinite(parsedLat) && Number.isFinite(parsedLon) && lat !== '' && lon !== ''
+  const sample = isSampleStation(station)
+  const hasBook = Boolean(station)
 
   function applyPlace(place: (typeof PLACES)[number]) {
     setLat(String(place.lat))
@@ -43,9 +48,31 @@ export function Onboarding() {
     )
   }
 
+  function startEstablish() {
+    if (hasBook) {
+      setConfirmNew(true)
+      setConfirmSample(false)
+      return
+    }
+    setStep(1)
+  }
+
+  async function walkSample() {
+    if (sample) {
+      openBook()
+      return
+    }
+    if (hasBook) {
+      setConfirmSample(true)
+      setConfirmNew(false)
+      return
+    }
+    await openSample()
+  }
+
   async function found() {
     if (!coordsOk) return
-    const station: Station = {
+    const next: Station = {
       name: name.trim() || placeName || 'Untitled station',
       observer: observer.trim() || 'Anonymous keeper',
       lat: parsedLat,
@@ -54,8 +81,10 @@ export function Onboarding() {
       hemisphere: hemisphereFromLat(parsedLat),
       established: isoDate(new Date()),
       bio: '',
+      sample: false,
     }
-    await saveStation(station)
+    if (hasBook) await beginOwnStation(next)
+    else await saveStation(next)
   }
 
   return (
@@ -81,14 +110,74 @@ export function Onboarding() {
             Nothing leaves this device. There is no account. You are the keeper of a station, even if
             the station is a balcony.
           </p>
+          {sample && (
+            <p className="muted">The sample hollow is still open. You can return to it anytime.</p>
+          )}
           <div className="form-actions">
-            <button className="btn" type="button" onClick={() => setStep(1)}>
+            {hasBook && (
+              <button className="btn" type="button" onClick={openBook}>
+                Return to {station?.name}
+              </button>
+            )}
+            <button
+              className={hasBook ? 'btn btn-quiet' : 'btn'}
+              type="button"
+              onClick={startEstablish}
+            >
               Establish a station
             </button>
-            <button className="btn btn-quiet" type="button" onClick={() => void loadSample()}>
-              Walk a sample year
+            <button className="btn btn-quiet" type="button" onClick={() => void walkSample()}>
+              {sample ? 'Continue the sample' : 'Walk a sample year'}
             </button>
           </div>
+          {confirmNew && (
+            <div className="home-confirm">
+              <p>
+                {sample
+                  ? 'Starting your own station puts the sample away and opens a blank book. The sample can be loaded again later.'
+                  : 'This replaces your current station and records with a new blank book.'}
+              </p>
+              <div className="form-actions">
+                <button
+                  className="btn"
+                  type="button"
+                  onClick={() => {
+                    setConfirmNew(false)
+                    setStep(1)
+                  }}
+                >
+                  Continue
+                </button>
+                <button className="btn btn-quiet" type="button" onClick={() => setConfirmNew(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
+          {confirmSample && (
+            <div className="home-confirm">
+              <p>Loading the sample replaces your current station and records.</p>
+              <div className="form-actions">
+                <button
+                  className="btn"
+                  type="button"
+                  onClick={() => {
+                    setConfirmSample(false)
+                    void loadSample()
+                  }}
+                >
+                  Load the sample
+                </button>
+                <button
+                  className="btn btn-quiet"
+                  type="button"
+                  onClick={() => setConfirmSample(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )}
         </section>
       )}
 

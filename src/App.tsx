@@ -3,7 +3,7 @@ import { Onboarding } from './components/Onboarding'
 import { Shell } from './components/Shell'
 
 function Root() {
-  const { ready, station } = useStore()
+  const { ready, station, home } = useStore()
 
   if (!ready) {
     return (
@@ -21,7 +21,7 @@ function Root() {
     )
   }
 
-  if (!station) return <Onboarding />
+  if (home || !station) return <Onboarding />
   return <Shell />
 }
 
