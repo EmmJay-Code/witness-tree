@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { hemisphereFromLat, PLACES, formatCoords } from '../data/places'
+import { hemisphereFromLat, formatCoords } from '../data/places'
 import { buildCsv, buildBackup, downloadText, parseBackup } from '../lib/export'
 import { isoDate } from '../lib/calendar'
+import { isSampleStation } from '../lib/sample'
 import { useStore } from '../state/store'
 
 export function StationView() {
@@ -19,6 +20,7 @@ export function StationView() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState('')
   const [confirmWipe, setConfirmWipe] = useState(false)
+  const [confirmSample, setConfirmSample] = useState(false)
   const [name, setName] = useState(station?.name ?? '')
   const [observer, setObserver] = useState(station?.observer ?? '')
   const [bio, setBio] = useState(station?.bio ?? '')
@@ -86,6 +88,8 @@ export function StationView() {
     typeof Intl !== 'undefined' && 'supportedValuesOf' in Intl
       ? Intl.supportedValuesOf('timeZone')
       : [timezone]
+
+  const sample = isSampleStation(station)
 
   return (
     <div className="station">
@@ -187,13 +191,49 @@ export function StationView() {
 
       <section className="station-block">
         <p className="kicker">Sample hollow</p>
-        <p>
-          Load three years of invented New England phenology at {PLACES[0].name}’s latitude — a way to
-          walk the ring before your own year has marks. This replaces the current ledger.
-        </p>
-        <button type="button" className="btn btn-quiet" onClick={() => void loadSample()}>
-          Load Blackwood Hollow
-        </button>
+        {sample ? (
+          <>
+            <p>
+              This station is the canned walk-through. Starting your own book clears these invented
+              records. Your real ledger is never behind this button — only the sample is.
+            </p>
+            {!confirmSample ? (
+              <button type="button" className="btn" onClick={() => setConfirmSample(true)}>
+                Start your own station
+              </button>
+            ) : (
+              <div className="choice-row">
+                <button type="button" className="btn" onClick={() => void resetAll()}>
+                  Yes, clear the sample
+                </button>
+                <button type="button" className="btn btn-quiet" onClick={() => setConfirmSample(false)}>
+                  Stay here
+                </button>
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <p>
+              Load three years of invented New England phenology — a way to walk the ring before your
+              own year has marks. This replaces the current ledger.
+            </p>
+            {!confirmSample ? (
+              <button type="button" className="btn btn-quiet" onClick={() => setConfirmSample(true)}>
+                Load Blackwood Hollow
+              </button>
+            ) : (
+              <div className="choice-row">
+                <button type="button" className="btn" onClick={() => void loadSample()}>
+                  Replace my records with the sample
+                </button>
+                <button type="button" className="btn btn-quiet" onClick={() => setConfirmSample(false)}>
+                  Keep my station
+                </button>
+              </div>
+            )}
+          </>
+        )}
       </section>
 
       <section className="station-block">

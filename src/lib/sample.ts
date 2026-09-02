@@ -69,6 +69,19 @@ export const SAMPLE_STATION: Station = {
   hemisphere: 'N',
   established: '2024-01-01',
   bio: 'A made-up New England hollow for walking the ring before you keep your own. Delete it whenever you like.',
+  sample: true,
+}
+
+/** Sample is a flag, not a name. The fingerprint only recognizes the canned hollow. */
+export function isSampleStation(station: Station | null | undefined): boolean {
+  if (!station) return false
+  if (station.sample === true) return true
+  return (
+    station.name === SAMPLE_STATION.name &&
+    station.observer === SAMPLE_STATION.observer &&
+    station.lat === SAMPLE_STATION.lat &&
+    station.lon === SAMPLE_STATION.lon
+  )
 }
 
 export function buildSampleObservations(now = new Date()): Observation[] {

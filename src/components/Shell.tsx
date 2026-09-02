@@ -8,6 +8,7 @@ import { Log } from './Log'
 import { Library } from './Library'
 import { StationView } from './Station'
 import { ObservationForm } from './ObservationForm'
+import { SampleBanner } from './SampleBanner'
 import { Specimen } from './Specimen'
 
 export function Shell() {
@@ -75,6 +76,7 @@ export function Shell() {
               key={item.id}
               type="button"
               className={view === item.id ? 'is-on' : ''}
+              aria-current={view === item.id ? 'page' : undefined}
               onClick={() => setView(item.id)}
             >
               <span>{item.label}</span>
@@ -85,7 +87,10 @@ export function Shell() {
         <p className="spine-station">{station.name}</p>
       </aside>
 
-      <main className="stage">
+      <div className="shell-body">
+        <SampleBanner />
+        <div className="shell-pages">
+          <main className="stage">
         {view === 'ring' && (
           <div className="ring-stage">
             <header className="ring-toolbar">
@@ -96,6 +101,8 @@ export function Shell() {
               <div className="year-pills" role="tablist" aria-label="Years">
                 <button
                   type="button"
+                  role="tab"
+                  aria-selected={settings.selectedYear === 'all'}
                   className={settings.selectedYear === 'all' ? 'is-on' : ''}
                   onClick={() => void updateSettings({ selectedYear: 'all' })}
                 >
@@ -105,6 +112,8 @@ export function Shell() {
                   <button
                     key={y}
                     type="button"
+                    role="tab"
+                    aria-selected={settings.selectedYear === y}
                     className={settings.selectedYear === y ? 'is-on' : ''}
                     onClick={() => void updateSettings({ selectedYear: y })}
                   >
@@ -135,14 +144,20 @@ export function Shell() {
         {view === 'log' && <Log />}
         {view === 'library' && <Library />}
         {view === 'station' && <StationView />}
-      </main>
+          </main>
 
-      <aside className="panel" aria-label="Inspector">
-        {formOpen ? <ObservationForm key={`${formDate ?? ''}-${selectedId ?? 'new'}`} /> : <Specimen />}
-        <p className="keys">
-          <kbd>n</kbd> new · <kbd>1–5</kbd> views · <kbd>/</kbd> search · <kbd>esc</kbd> close
-        </p>
-      </aside>
+          <aside className="panel" aria-label="Inspector">
+            {formOpen ? (
+              <ObservationForm key={`${formDate ?? ''}-${selectedId ?? 'new'}`} />
+            ) : (
+              <Specimen />
+            )}
+            <p className="keys">
+              <kbd>n</kbd> new · <kbd>1–5</kbd> views · <kbd>/</kbd> search · <kbd>esc</kbd> close
+            </p>
+          </aside>
+        </div>
+      </div>
     </div>
   )
 }

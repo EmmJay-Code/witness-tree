@@ -11,7 +11,7 @@ import {
   seasonAt,
 } from '../lib/calendar'
 import { KINGDOM_META, phaseMeta } from '../lib/phenophases'
-import { arcPath, dayToAngle, pointerToDay, polar } from '../lib/ring'
+import { arcPath, dayToAngle, pointerToDay, polar, stackOffset } from '../lib/ring'
 import { speciesById } from '../lib/ids'
 
 const CX = 500
@@ -85,6 +85,27 @@ export function YearRing({
 
   const hoverObs = hover ? observations.find((o) => o.id === hover.id) : undefined
   const hoverSpecies = hoverObs ? speciesById(customSpecies, hoverObs.speciesId) : undefined
+
+  const stackIndex = (() => {
+    const groups = new Map<string, string[]>()
+    for (const obs of observations) {
+      const date = parseIsoDate(obs.date)
+      const y = date.getFullYear()
+      if (!visibleYears.includes(y)) continue
+      const key = `${y}-${dayOfYear(date)}`
+      const list = groups.get(key)
+      if (list) list.push(obs.id)
+      else groups.set(key, [obs.id])
+    }
+    const index = new Map<string, { i: number; n: number }>()
+    for (const ids of groups.values()) {
+      ids.forEach((id, i) => index.set(id, { i, n: ids.length }))
+    }
+    return index
+  })()
+
+  const dense = year === 'all' && observations.length > 48
+  const markSize = dense ? 5 : 7
 
   return (
     <div className="ring-wrap">
@@ -172,7 +193,10 @@ export function YearRing({
           const doy = dayOfYear(date)
           const days = daysInYear(y)
           const angle = dayToAngle(doy, days)
-          const r = radiusForYear(y)
+          const stack = stackIndex.get(obs.id)
+          const r =
+            radiusForYear(y) +
+            stackOffset(stack?.i ?? 0, stack?.n ?? 1, Math.min(11, ringSpan * 0.34))
           const { x, y: py } = polar(CX, CY, r, angle)
           const sp = speciesById(customSpecies, obs.speciesId)
           const color = KINGDOM_META[sp?.kingdom ?? 'other'].color
@@ -182,7 +206,7 @@ export function YearRing({
             <g
               key={obs.id}
               data-obs={obs.id}
-              className={`obs-mark ${selected ? 'is-selected' : ''}`}
+              className={`obs-mark ${selected ? 'is-selected' : ''} ${dense ? 'is-dense' : ''}`}
               transform={`translate(${x} ${py})`}
               onClick={(e) => {
                 e.stopPropagation()
@@ -201,11 +225,15 @@ export function YearRing({
               role="button"
               tabIndex={0}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') onSelect(obs.id)
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  onSelect(obs.id)
+                }
               }}
               aria-label={`${sp?.commonName ?? 'Observation'} — ${phaseMeta(obs.phenophase).label} on ${obs.date}`}
             >
-              <Marker kind={marker} color={color} selected={selected} angle={angle} />
+              <circle r="12" fill="transparent" />
+              <Marker kind={marker} color={color} selected={selected} angle={angle} size={markSize} />
             </g>
           )
         })}
@@ -225,6 +253,7 @@ export function YearRing({
           style={{
             left: hover.x,
             top: hover.y,
+            transform: hover.x > 420 ? 'translate(calc(-100% - 12px), -110%)' : undefined,
           }}
         >
           <strong>{hoverSpecies?.commonName ?? 'Unknown'}</strong>
@@ -242,15 +271,17 @@ function Marker({
   color,
   selected,
   angle,
+  size,
 }: {
   kind: 'first' | 'peak' | 'last'
   color: string
   selected: boolean
   angle: number
+  size: number
 }) {
-  const size = selected ? 11 : 7
+  const r = selected ? size + 3 : size
   if (kind === 'peak') {
-    return <circle r={size} fill={color} className="mark-fill" />
+    return <circle r={r} fill={color} className="mark-fill" />
   }
   const rad = (angle * Math.PI) / 180
   const dir = kind === 'first' ? 1 : -1
@@ -258,8 +289,8 @@ function Marker({
   const oy = Math.sin(rad) * dir
   const px = -oy
   const py = ox
-  const tip = `${ox * (size + 2)},${oy * (size + 2)}`
-  const a = `${-ox * size + px * size},${-oy * size + py * size}`
-  const b = `${-ox * size - px * size},${-oy * size - py * size}`
+  const tip = `${ox * (r + 2)},${oy * (r + 2)}`
+  const a = `${-ox * r + px * r},${-oy * r + py * r}`
+  const b = `${-ox * r - px * r},${-oy * r - py * r}`
   return <polygon points={`${tip} ${a} ${b}`} fill={color} className="mark-fill" />
 }

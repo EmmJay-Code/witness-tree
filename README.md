@@ -56,8 +56,9 @@ npm run smoke
 ## Using it
 
 1. Establish a station (a name and a point on Earth), or walk the sample hollow.
-2. Press **Log a first** or the `n` key.
-3. Click a mark on the ring to pin it. Click an empty stretch of the ring to pre-date a record.
+2. If you walked the sample, a banner at the top of the book lets you start your own station — that clears the invented records and returns you to setup.
+3. Press **Log a first** or the `n` key.
+4. Click a mark on the ring to pin it. Click an empty stretch of the ring to pre-date a record.
 
 Keyboard: `1–5` views, `n` new, `/` search the log, `esc` close.
 

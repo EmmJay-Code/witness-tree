@@ -82,6 +82,8 @@ export interface Station {
   hemisphere: Hemisphere
   established: string
   bio: string
+  /** True only for the canned sample hollow — never inferred from a name the keeper typed. */
+  sample?: boolean
 }
 
 export interface Settings {

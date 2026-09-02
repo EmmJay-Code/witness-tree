@@ -27,32 +27,45 @@ await page.getByRole('heading', { name: 'The ring' }).waitFor()
 
 const marks = await page.locator('[data-obs]').count()
 if (marks < 20) throw new Error(`Expected a populated ring, got ${marks} marks`)
+await page.getByText(/made-up station/i).waitFor()
 
-await page.getByRole('button', { name: 'Almanac' }).click()
+await page.setViewportSize({ width: 390, height: 844 })
+await page.getByRole('button', { name: 'Start your own station' }).waitFor()
+await page.locator('.spine-nav').getByRole('button', { name: 'Almanac' }).waitFor()
+await page.setViewportSize({ width: 1280, height: 900 })
+
+await page.locator('.spine-nav').getByRole('button', { name: 'Almanac' }).click()
 await page.getByRole('heading', { name: /2026/ }).waitFor()
 const sun = await page.getByText(/to/).first().innerText()
 if (!/\d{2}:\d{2}/.test(sun) && !/does not/.test(await page.content())) {
   // Almanac should mention sun times or polar edge cases
 }
 
-await page.getByRole('button', { name: 'Log' }).click()
+await page.locator('.spine-nav').getByRole('button', { name: 'Log' }).click()
 await page.getByRole('heading', { name: /records/ }).waitFor()
 
-await page.getByRole('button', { name: 'Library' }).click()
+await page.locator('.spine-nav').getByRole('button', { name: 'Library' }).click()
 await page.getByText('Common lilac').waitFor()
 
-await page.getByRole('button', { name: 'Station' }).click()
+await page.locator('.spine-nav').getByRole('button', { name: 'Station' }).click()
 await page.getByText('Blackwood Hollow').first().waitFor()
 await page.getByRole('button', { name: 'Lamp' }).click()
 await page.waitForFunction(() => document.documentElement.dataset.theme === 'lamp')
 
-await page.getByRole('button', { name: 'Ring' }).click()
+await page.locator('.spine-nav').getByRole('button', { name: 'Ring' }).click()
 await page.locator('[data-obs]').first().click()
 await page.getByRole('heading', { level: 2 }).waitFor()
 
 await page.keyboard.press('n')
 await page.getByRole('heading', { name: 'New observation' }).waitFor()
 await page.getByRole('button', { name: 'Cancel' }).click()
+
+await page.getByRole('button', { name: 'Start your own station' }).click()
+await page.getByRole('button', { name: 'Yes, start over' }).click()
+await page.getByRole('heading', { name: /Keep a ring/i }).waitFor()
+await page.getByRole('button', { name: 'Walk a sample year' }).click()
+await page.getByRole('heading', { name: 'The ring' }).waitFor()
+await page.getByText(/made-up station/i).waitFor()
 
 await page.screenshot({ path: 'smoke-ring.png', fullPage: true })
 await browser.close()

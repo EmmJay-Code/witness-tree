@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { buildBackup, buildCsv, parseBackup } from './export'
 import { inWindow, shiftDoy } from './ids'
-import { SAMPLE_STATION, buildSampleObservations } from './sample'
+import { SAMPLE_STATION, buildSampleObservations, isSampleStation } from './sample'
 import { seasonalPrompts } from './prompts'
 import { SPECIES_LIBRARY } from '../data/species'
 
@@ -44,6 +44,19 @@ describe('sample ledger', () => {
     expect(rows.length).toBeGreaterThan(40)
     expect(rows.every((r) => r.date <= '2026-06-01')).toBe(true)
     expect(rows.every((r) => r.speciesId !== 'junco')).toBe(true)
+  })
+
+  it('marks the canned hollow as a sample, never a coincidental name', () => {
+    expect(isSampleStation(SAMPLE_STATION)).toBe(true)
+    expect(isSampleStation({ ...SAMPLE_STATION, sample: true })).toBe(true)
+    expect(
+      isSampleStation({
+        ...SAMPLE_STATION,
+        sample: undefined,
+        observer: 'A real keeper',
+      }),
+    ).toBe(false)
+    expect(isSampleStation(null)).toBe(false)
   })
 })
 

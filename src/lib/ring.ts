@@ -57,3 +57,9 @@ export function pointerToDay(
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI
   return { doy: angleToDay(angle, days), dist }
 }
+
+/** Spread coincident marks along the radius so they do not sit on one point. */
+export function stackOffset(index: number, count: number, spacing: number): number {
+  if (count <= 1) return 0
+  return (index - (count - 1) / 2) * spacing
+}

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { angleToDay, dayToAngle, polar } from './ring'
+import { angleToDay, dayToAngle, polar, stackOffset } from './ring'
 
 describe('year ring math', () => {
   it('places day 1 at the top of the ring', () => {
@@ -18,5 +18,12 @@ describe('year ring math', () => {
     const apr = polar(0, 0, 100, dayToAngle(91, 365))
     expect(jan.y).toBeLessThan(0)
     expect(apr.x).toBeGreaterThan(0)
+  })
+
+  it('spreads coincident marks around a shared radius', () => {
+    expect(stackOffset(0, 1, 10)).toBe(0)
+    expect(stackOffset(0, 3, 10)).toBe(-10)
+    expect(stackOffset(1, 3, 10)).toBe(0)
+    expect(stackOffset(2, 3, 10)).toBe(10)
   })
 })
